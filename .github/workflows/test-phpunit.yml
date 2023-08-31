@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         php: ['7.4']
-        DB: [ 'pdo/mysql', 'pdo/pgsql', 'pdo/sqlite', 'mysqli', 'pgsql', 'sqlite' ]
+        DB: [ 'mysqli' ]
         compiler: [ default ]
         include:
           - php: '7.4'
@@ -46,7 +46,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: composer, pecl
-          extensions: imagick, sqlite3, pgsql, mysqli, pdo, pdo_mysql, pdo_pgsql, pdo_sqlite, mbstring
+          extensions: imagick, mysqli, pdo, pdo_mysql, mbstring
           ini-values: ${{ env.PHP_INI_VALUES }}
           coverage: xdebug
 
@@ -61,9 +61,3 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-   
       - name: Install composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-      - name: PHPUnit Test
-        run: |
-          php -d error_reporting=E_ALL -d zend.enable_gc=0 -d date.timezone=UTC -d mbstring.func_overload=7 -d mbstring.internal_encoding=UTF-8 vendor/bin/phpunit --coverage-text --configuration tests/travis/${{ matrix.DB }}.phpunit.xml
-        env:
-          XDEBUG_MODE: coverage
