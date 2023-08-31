@@ -6,10 +6,9 @@ on:
       - main
 
 jobs:
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-     if: "!contains(github.event.head_commit.message, '[ci skip]')"
+  tests:
+   runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
      env:
        PHP_INI_VALUES: assert.exception=1, zend.assertions=
        
