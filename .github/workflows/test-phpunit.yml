@@ -5,62 +5,77 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-
 jobs:
-  tests:
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
-    env:
-      PHP_INI_VALUES: assert.exception=1, zend.assertions=1
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php: ['7.4']
-        DB: [ 'mysqli' ]
-        compiler: [ default ]
-        include:
-          - php: '7.4'
-            DB: 'mysqli'
-            compiler: jit
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_USER: travis
-          MYSQL_PASSWORD: travis
-          MYSQL_DATABASE: ci_test
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Override PHP ini values for JIT compiler
-        if: matrix.compiler == 'jit'
-        run: echo "PHP_INI_VALUES::assert.exception=1, zend.assertions=1, opcache.enable=1, opcache.enable_cli=1, opcache.optimization_level=-1, opcache.jit=1255, opcache.jit_buffer_size=64M" >> $GITHUB_ENV 
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Install PHP${{ matrix.php }} - DB ${{ matrix.DB }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          tools: composer, pecl
-          extensions: imagick, mysqli, pdo, pdo_mysql, mbstring
-          ini-values: ${{ env.PHP_INI_VALUES }}
-          coverage: xdebug
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 7.4
 
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-      - name: Cache composer dependencies
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-   
-      - name: Install composer dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
+    - name: Install dependencies
+      run: composer install
+
+
+#jobs:
+#  tests:
+#   runs-on: ubuntu-latest
+#    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+#    env:
+#      PHP_INI_VALUES: assert.exception=1, zend.assertions=
+
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        php: ['7.4']
+#        DB: [ 'mysqli' ]
+#        compiler: [ default ]
+#        include:
+#          - php: '7.4'
+#            DB: 'mysqli'
+#            compiler: jit
+#    services:
+#      mysql:
+#        image: mysql:5.7
+#        env:
+#          MYSQL_ALLOW_EMPTY_PASSWORD: true
+#          MYSQL_USER: travis
+#          MYSQL_PASSWORD: travis
+#          MYSQL_DATABASE: ci_test
+#        ports:
+#          - 3306:3306
+#        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#      - name: Override PHP ini values for JIT compiler
+#        if: matrix.compiler == 'jit'
+#        run: echo "PHP_INI_VALUES::assert.exception=1, zend.assertions=1, opcache.enable=1, opcache.enable_cli=1, opcache.optimization_level=-1, opcache.jit=1255, opcache.jit_buffer_size=64M" >> $GITHUB_ENV 
+
+ #     - name: Install PHP${{ matrix.php }} - DB ${{ matrix.DB }}
+ #       uses: shivammathur/setup-php@v2
+ #       with:
+ #         php-version: ${{ matrix.php }}
+ #         tools: composer, pecl
+ #         extensions: imagick, mysqli, pdo, pdo_mysql, mbstring
+ #         ini-values: ${{ env.PHP_INI_VALUES }}
+ #         coverage: xdebug
+
+ #     - name: Get composer cache directory
+ #       id: composer-cache
+ #       run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+ #     - name: Cache composer dependencies
+ #       uses: actions/cache@v2
+ #       with:
+ #         path: ${{ steps.composer-cache.outputs.dir }}
+ #         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+ #         restore-keys: ${{ runner.os }}-composer-   
+ #     - name: Install composer dependencies
+ #       run: composer install --no-progress --prefer-dist --optimize-autoloader
