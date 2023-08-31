@@ -1,18 +1,26 @@
-name: Docker Image CI
+name: CodeIgniter 3 CI/CD
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-
-  build:
-
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 7.4
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Run CodeIgniter tests
+      run: php vendor/phpunit/phpunit/phpunit
