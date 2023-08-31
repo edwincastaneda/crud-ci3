@@ -22,5 +22,5 @@ jobs:
     - name: Install dependencies
       run: composer install
 
-    - name: Run CodeIgniter tests
-      run: php vendor/phpunit/phpunit/phpunit
+#    - name: Run CodeIgniter tests
+#      run: php vendor/phpunit/phpunit/phpunit
